@@ -114,7 +114,7 @@ namespace multi {
         while (true) {
             printf("Hello World!");
             ++doing;
-            if (doing == 100'000'000'000'000ul) {
+            if (doing == 1'000'000'000'000ul) {
                 writeFunc.join();
                 writeFunc = std::thread(writeCount);
             }
@@ -146,7 +146,7 @@ namespace multi {
             {
                 const auto ep = system_clock::now();
                 while (true) {
-                    if (duration_cast<minutes>(system_clock::now() - ep) >= minutes(1)) {
+                    if (duration_cast<hours>(system_clock::now() - ep) >= hours(12)) {
                         writeCount();
                         _exit(0);
                     }
