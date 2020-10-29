@@ -77,7 +77,6 @@ namespace multi {
                 break;
             }
         }
-        const auto time_start = hr::now();
         FILE* fp_r;
         char* readBuf =  reinterpret_cast<char*>(malloc(sizeof(char) * 350));
         while (true) {
@@ -109,6 +108,20 @@ namespace multi {
     }
 
     inline int multifunc() {
+        if (setvbuf(stdout, NULL, _IOFBF, 1 * 1024 * 1024 * 1024)) {
+            printf("failed setvbuf()\n");
+            system("pause");
+            return 0;
+        }
+
+        struct stat statBuf;
+        if (stat("Result.txt", &statBuf) != 0) {
+            FILE* fp;
+            fopen_s(&fp, "Result.txt", "w");
+            fprintf_s(fp, "0");
+            fclose(fp);
+        }
+
         std::thread writeFunc([]{return;});
 
         while (true) {
@@ -124,20 +137,6 @@ namespace multi {
     }
 
     inline int multimain() {
-        if (setvbuf(stdout, NULL, _IOFBF, 1 * 1024 * 1024 * 1024)) {
-            printf("failed setvbuf()\n");
-            system("pause");
-            return 0;
-        }
-
-        struct stat statBuf;
-        if (stat("Result.txt", &statBuf) != 0) {
-            FILE* fp;
-            fopen_s(&fp, "Result.txt", "w");
-            fprintf_s(fp, "0");
-            fclose(fp);
-        }
-
         #pragma omp parallel sections num_threads(2)
         {
             #pragma omp section
@@ -146,11 +145,13 @@ namespace multi {
             {
                 const auto ep = system_clock::now();
                 while (true) {
-                    if (duration_cast<hours>(system_clock::now() - ep) >= hours(12)) {
+                    if (duration_cast<minutes>(system_clock::now() - ep) >= minutes(3)) {
                         writeCount();
+                        FILE* fp;
+                        fopen_s(&fp, "EndApp", "w");
                         _exit(0);
                     }
-                    std::this_thread::sleep_for(minutes(1));
+                    std::this_thread::sleep_for(seconds(1));
                 }
             }
         }
